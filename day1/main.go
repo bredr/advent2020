@@ -36,7 +36,16 @@ func main() {
 		for _, y := range data {
 			if x+y == 2020 {
 				fmt.Printf("%d * %d = %d\n", x, y, x*y)
-				return
+			}
+		}
+	}
+	for _, x := range data {
+		for _, y := range data {
+			for _, z := range data {
+				if x+y+z == 2020 {
+					fmt.Printf("%d * %d * %d = %d\n", x, y, z, x*y*z)
+					return
+				}
 			}
 		}
 	}
