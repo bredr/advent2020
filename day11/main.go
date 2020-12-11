@@ -75,6 +75,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
 	rule1 := Rule{
 		change: occupied, r: func(x [][]rune) [][]rune {
 			newState := make([][]rune, len(x))
@@ -91,6 +92,71 @@ func main() {
 									if x[k][l] == occupied {
 										change = false
 									}
+								}
+							}
+						}
+						if change {
+							newState[i][j] = occupied
+						}
+					}
+				}
+			}
+			return newState
+		},
+	}
+
+	rule1b := Rule{
+		change: occupied, r: func(x [][]rune) [][]rune {
+			newState := make([][]rune, len(x))
+			for i, row := range x {
+				newState[i] = make([]rune, len(row))
+			}
+			maxRadius := len(x)
+			if len(x[0]) > maxRadius {
+				maxRadius = len(x[0])
+			}
+			for i, row := range x {
+				for j := range row {
+					if x[i][j] == empty {
+						change := true
+						directions := []func(int) (int, int){
+							func(r int) (int, int) {
+								return i, j + r
+							},
+							func(r int) (int, int) {
+								return i + r, j + r
+							},
+							func(r int) (int, int) {
+								return i + r, j
+							},
+							func(r int) (int, int) {
+								return i + r, j - r
+							},
+							func(r int) (int, int) {
+								return i, j - r
+							},
+							func(r int) (int, int) {
+								return i - r, j - r
+							},
+							func(r int) (int, int) {
+								return i - r, j + r
+							},
+							func(r int) (int, int) {
+								return i - r, j
+							},
+						}
+						for _, posFn := range directions {
+							for r := 1; r <= maxRadius; r++ {
+								k, l := posFn(r)
+								if k >= 0 && k < len(x) && l >= 0 && l < len(row) {
+									if x[k][l] == empty {
+										break
+									}
+									if x[k][l] == occupied {
+										change = false
+									}
+								} else {
+									break
 								}
 							}
 						}
@@ -134,15 +200,78 @@ func main() {
 		},
 	}
 
+	rule2b := Rule{
+		change: empty,
+		r: func(x [][]rune) [][]rune {
+			newState := make([][]rune, len(x))
+			for i, row := range x {
+				newState[i] = make([]rune, len(row))
+			}
+			maxRadius := len(x)
+			if len(x[0]) > maxRadius {
+				maxRadius = len(x[0])
+			}
+			for i, row := range x {
+				for j := range row {
+					if x[i][j] == occupied {
+						adjacentOccupied := 0
+						directions := []func(int) (int, int){
+							func(r int) (int, int) {
+								return i, j + r
+							},
+							func(r int) (int, int) {
+								return i + r, j + r
+							},
+							func(r int) (int, int) {
+								return i + r, j
+							},
+							func(r int) (int, int) {
+								return i + r, j - r
+							},
+							func(r int) (int, int) {
+								return i, j - r
+							},
+							func(r int) (int, int) {
+								return i - r, j - r
+							},
+							func(r int) (int, int) {
+								return i - r, j + r
+							},
+							func(r int) (int, int) {
+								return i - r, j
+							},
+						}
+						for _, posFn := range directions {
+							for r := 1; r <= maxRadius; r++ {
+								k, l := posFn(r)
+								if k >= 0 && k < len(x) && l >= 0 && l < len(row) {
+									if x[k][l] == occupied {
+										adjacentOccupied++
+										break
+									}
+									if x[k][l] == empty {
+										break
+									}
+								} else {
+									break
+								}
+							}
+						}
+						if adjacentOccupied >= 5 {
+							newState[i][j] = empty
+						}
+					}
+				}
+			}
+			return newState
+		},
+	}
+
 	result1 := Simulation(data, rule1, rule2)
 	fmt.Printf("result1 = %d\n", countOccupied(result1))
-}
 
-func Print(x [][]rune) {
-	for _, row := range x {
-		fmt.Println(string(row))
-	}
-	fmt.Println()
+	result2 := Simulation(data, rule1b, rule2b)
+	fmt.Printf("result2 = %d\n", countOccupied(result2))
 }
 
 func countOccupied(x [][]rune) int {
